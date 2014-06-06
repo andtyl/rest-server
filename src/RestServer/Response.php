@@ -3,6 +3,7 @@ namespace RestServer;
 
 class Response
 {
+    /** @var array HTTP status codes and messages */
     protected $http_status_code_texts = array(
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -46,55 +47,95 @@ class Response
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported'
     );
-
+    
+    /** @var array HTTP headers */
     protected $headers = array();   
 
+    /** @var int HTTP code */
     protected $code;
 
+    /** @var string HTTP body */
     protected $body;    
     
+    /**
+     * Constructor
+     *
+     * @param int $code HTTP code
+     * @param string $body HTTP body
+     * @param array $headers HTTP headers
+     */
     public function __construct($code = 200, $body = "", $headers = array())
     {
         $this->setCode($code);
         $this->setBody($body);
         $this->setHeaders($headers);
     }
+
+    /**
+     * Get HTTP headers
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
     
+    /**
+     * Add HTTP header
+     *
+     * @param string $header Header (eg "Header-name: Value")
+     */
     public function addHeader($header)
     {
         $this->headers[] = $header;
     }   
 
-    public function setHeaders(array $headers)
-    {
-        $this->headers = $headers;
-    }   
-    
-    public function getHeaders()
-    {
-        return $this->headers;
-    }
-
+    /**
+     * Get HTTP code
+     *
+     * @return int
+     */
     public function getCode()
     {
         return $this->code;
     }
 
+    /**
+     * Set HTTP code
+     *
+     * @param int $code HTTP code
+     */
     public function setCode($code)
     {
         $this->code = $code;
     }   
     
+    /**
+     * Get HTTP body
+     *
+     * @return string
+     */
     public function getBody()
     {
         return $this->body;
     }
 
+    /**
+     * Set HTTP body
+     *
+     * @param string $body HTTP body
+     */
     public function setBody($body)
     {
         $this->body = $body;
     }
 
+    /**
+     * Send Response to browser
+     *
+     * @return void
+     */
     public function send()
     {
         header_remove("X-Powered-By");
@@ -105,6 +146,12 @@ class Response
         echo $this->getBody();
     }
 
+    /**
+     * Get HTTP status code text
+     *
+     * @param int $code HTTP staus code
+     * @return string
+     */
     protected function getHttpStatusCodeText($code = null)
     {
         $code = $code ?: $this->getCode();

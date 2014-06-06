@@ -6,12 +6,20 @@ use RuntimeException;
 
 class Router
 {
+    /** @var Request Instance of Request */
     protected $request;
 
+    /** @var array Array of Routes */
     protected $routes = array();
 
+    /** @var array Array of Tokens */
     protected $tokens = array();
 
+    /**
+     * Constructor
+     *
+     * @param Request|null $request Instance of Request or null
+     */
     public function __construct(Request $request = null)
     {
         if ($request === null) {
@@ -20,6 +28,11 @@ class Router
         $this->request = $request;
     }
 
+    /**
+     * "Run" the Router
+     *
+     * @return void
+     */
     public function run()
     {
         $this->sortRoutes();
@@ -38,6 +51,15 @@ class Router
         $response->send();
     }
 
+    /**
+     * Try to match a Route against the HTTP method and URL
+     *
+     * @param string $method HTTP method
+     * @param string $url URL
+     * @param array $params Params (passed by reference because the Route sets the URL parameters to this)
+     * @return Route Instance of a Route
+     * @throws RestServerException If no Route is matched
+     */
     protected function matchRoute($method, $url, &$params)
     {
         foreach ($this->routes as $route) {
@@ -49,6 +71,11 @@ class Router
         throw new RestServerException("404");
     }
 
+    /**
+     * Sort the routes so that the Route with "highest dignity" is matched first
+     *
+     * @return void
+     */
     protected function sortRoutes()
     {
         usort($this->routes, function($a, $b) {
@@ -56,6 +83,12 @@ class Router
         });
     }
 
+    /**
+     * Generate JSON of a string, object or array
+     *
+     * @param mixed $data Can be anything but a resource
+     * @return string
+     */
     protected function json($data)
     {
         $json = json_encode($data);
@@ -87,6 +120,12 @@ class Router
         return $json;
     }
 
+    /**
+     * Authenticate, check that the api key and signature of the request is OK
+     *
+     * @return void
+     * @throws RestServerException On authentication failure
+     */
     protected function authenticate()
     {
         $auth_key = $this->request->getParam("auth_key", null);
@@ -104,26 +143,61 @@ class Router
         $token->authenticate($this->request->getRequestMethod(), $this->request->getUrl(), $this->request->getParam());
     }
 
+    /**
+     * Create a GET route
+     *
+     * @param string $url URL
+     * @param callable $callable Callable
+     * @return void
+     */
     public function get($url, $callable)
     {
         $this->routes[] = new Route(Request::METHOD_GET, $url, $callable);
     }
 
+    /**
+     * Create a POST route
+     *
+     * @param string $url URL
+     * @param callable $callable Callable
+     * @return void
+     */
     public function post($url, $callable)
     {
         $this->routes[] = new Route(Request::METHOD_POST, $url, $callable);
     }
 
+    /**
+     * Create a PUT route
+     *
+     * @param string $url URL
+     * @param callable $callable Callable
+     * @return void
+     */
     public function put($url, $callable)
     {
         $this->routes[] = new Route(Request::METHOD_PUT, $url, $callable);
     }
 
+    /**
+     * Create a DELETE route
+     *
+     * @param string $url URL
+     * @param callable $callable Callable
+     * @return void
+     */
     public function delete($url, $callable)
     {
         $this->routes[] = new Route(Request::METHOD_DELETE, $url, $callable);
     }
 
+    /**
+     * Create a authentication token
+     *
+     * @param string $key API Key
+     * @param string $secret API Secret
+     * @return Token The Token
+     */
     public function auth($key, $secret)
     {
         return $this->tokens[$key] = new Token($key, $secret);
