@@ -82,6 +82,16 @@ class Response
     }
     
     /**
+     * Set HTTP headers
+     *
+     * @param array $headers HTTP headers
+     */
+    public function setHeaders($headers)
+    {
+        $this->headers = $headers;
+    }
+
+    /**
      * Add HTTP header
      *
      * @param string $header Header (eg "Header-name: Value")
