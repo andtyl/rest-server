@@ -12,14 +12,20 @@
 ```php
 $request = new RestServer\Request();
 $router = new RestServer\Router($request);
-$router->get("hello", array($c, function() {
-    return array("message" => "Hello world!"); //Will be encoded to JSON
-}));
+$router->get("hello", function() {
+    return array("message" => "Hello world");
+});
 $router->auth("123", "456")->url("hello");
 $router->run();
 ```
 
-Se examples folder for  more server and client examples.
+Will output
+
+```json
+{'message': 'Hello world'}
+```
+
+See examples folder for more server and client examples.
 
 # TODO
 
