@@ -13,7 +13,7 @@
 $request = new RestServer\Request();
 $router = new RestServer\Router($request);
 $router->get("hello", function() {
-    return array("message" => "Hello world");
+    return array("message" => "hello world");
 });
 $router->auth("123", "456")->url("hello");
 $router->run();
@@ -22,7 +22,7 @@ $router->run();
 Will output
 
 ```json
-{'message': 'Hello world'}
+{"message":"hello world"}
 ```
 
 See examples folder for more server and client examples.
