@@ -59,7 +59,6 @@ class Request
         //Remove sub dir path from url path
         if (isset($this->senv['SCRIPT_NAME']) && $this->senv['SCRIPT_NAME']) {
             $sub_dir_path = dirname($this->senv['SCRIPT_NAME']);
-            //$sub_dir_path = $this->senv['SCRIPT_NAME'];
             $url_path = substr($url_path, strlen($sub_dir_path)); 
         }
 
