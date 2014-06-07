@@ -8,12 +8,21 @@ use Signature\Exception\AuthenticationException;
 
 class Token
 {
+    /** @var string API key */
     protected $key;
 
+    /** @var string API secret */
     protected $secret;
 
+    /** @var array Valid URL regex expression */
     protected $valid_url_regexs = array();
 
+    /**
+     * Constructor
+     *
+     * @param string $key API key
+     * @param string $secret API secret
+     */
     public function __construct($key, $secret)
     {
         $this->key = $key;
@@ -21,6 +30,12 @@ class Token
         return $this;
     }
 
+    /**
+     * Add a URL for this Token
+     *
+     * @param string $url URL
+     * @return self Returns self for method chaining
+     */
     public function url($url)
     {
         $url = $url ? (trim($url, "/") . "/") : "";
@@ -28,6 +43,12 @@ class Token
         return $this;
     }
 
+    /**
+     * Is URL valid for thos Token (A URL is valid as long it starts with it, eg "/hello" is valid for "/hello/foo")
+     *
+     * @param string $url URL
+     * @return bool
+     */
     protected function isValidUrl($url)
     {
         $url = trim($url, "/") . "/";
@@ -39,15 +60,24 @@ class Token
         return false;
     }
 
-    public function authenticate($method, $path, $params)
+    /**
+     * Authenticate Token, chgek URL and signature parameters
+     *
+     * @param string $method HTTP method
+     * @param string $url URL
+     * @param array $params Parameters
+     * @return void
+     * @throws RestServerException If not authenticated
+     */
+    public function authenticate($method, $url, $params)
     {
-        if (!$this->isValidUrl($path)) {
+        if (!$this->isValidUrl($url)) {
             throw new RestServerException(RestServerException::UNAUTHORIZED, 0, "You are not allowed to access this URL", "");
         }
 
         try {
             $signature_server = new Server(new Signer());
-            $signature_server->authenticate($this->secret, $method, $path, $params);
+            $signature_server->authenticate($this->secret, $method, $url, $params);
         } catch (AuthenticationException $e) {
             throw new RestServerException(RestServerException::UNAUTHORIZED, 0, "Invalid request signature: " . $e->getMessage(), "");
         }
