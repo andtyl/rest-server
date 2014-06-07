@@ -68,19 +68,39 @@ class Router
             }
         }
         
-        throw new RestServerException("404");
+        throw new RestServerException(RestServerException::NOT_FOUND, 0, "Not found", "");
     }
 
     /**
-     * Sort the routes so that the Route with "highest dignity" is matched first
+     * Sort the routes so that the Route with "highest precedence" is matched first
      *
      * @return void
      */
-    protected function sortRoutes()
+    public function sortRoutes()
     {
         usort($this->routes, function($a, $b) {
             return $a->compareTo($b);
-        });
+        });       
+    }
+
+    /**
+     * Get Routes
+     *
+     * @return array
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
+    }
+
+    /**
+     * Add Route
+     *
+     * @param Route $route Instance of Route
+     */
+    public function addRoute(Route $route)
+    {
+        $this->routes[] = $route;
     }
 
     /**

@@ -40,7 +40,7 @@ class Route
     {
         $this->request_method = $request_method;
 
-        //Ensure path is absolute
+        //Ensure path is absolute and no trailing slash
         $this->url = "/" . trim($url, "/");
         
         //Ensure callable is callable
@@ -60,7 +60,7 @@ class Route
      */
     protected function parseUrl()
     {
-        $this->url_regex = "~" . preg_replace("~(/\*)~", "/(.*?)", $this->url, -1, $this->num_url_parts_parameter) . "~";
+        $this->url_regex = "~^" . preg_replace("~(/\*)~", "/[^\/]+", $this->url, -1, $this->num_url_parts_parameter) . "$~";
         $this->num_url_parts = substr_count($this->url, "/");
         $this->num_url_parts_fixed = $this->num_url_parts - $this->num_url_parts_parameter;
     }
@@ -78,7 +78,7 @@ class Route
                 return;
             }
         }
-        $this->first_url_part_parameter_pos = 0;        
+        $this->first_url_part_parameter_pos = false;        
     }
 
     /**
@@ -114,6 +114,9 @@ class Route
      */
     protected function matchUrl($url, &$params)
     {
+        //Ensure path is absolute and no trailing slash
+        $url = "/" . trim($url, "/");
+
         if (preg_match($this->url_regex, $url, $params)) {
            array_shift($params); //First match is the whole regex, remove!
            return true; 
@@ -122,7 +125,7 @@ class Route
     }
 
     /**
-     * Compare this Route to another Route to find out which has "highest dignity"
+     * Compare this Route to another Route to find out which has "highest precedence"
      * To Be used in PHP comparison function.
      *
      * @param Route $route Instance of a Route
@@ -130,17 +133,34 @@ class Route
      */
     public function compareTo(Route $route)
     {
-        if ($this->getFirstUrlPartParameterPos() > $route->getFirstUrlPartParameterPos()) {
-            return 1;
-        } elseif ($this->getFirstUrlPartParameterPos() < $route->getFirstUrlPartParameterPos()) {
+        //Position of first URL parameter, higher or none is better
+        if ($this->getFirstUrlPartParameterPos() === false && $route->getFirstUrlPartParameterPos() !== false) {
             return -1;
+        } elseif ($this->getFirstUrlPartParameterPos() !== false && $route->getFirstUrlPartParameterPos() === false) {
+            return 1;
+        } elseif (($this->getFirstUrlPartParameterPos() !== false && $route->getFirstUrlPartParameterPos() !== false)) {
+            if ($this->getFirstUrlPartParameterPos() > $route->getFirstUrlPartParameterPos()) {
+                return -1;
+            } elseif ($this->getFirstUrlPartParameterPos() < $route->getFirstUrlPartParameterPos()) {
+                return 1;
+            }
         }
 
-        if ($this->getNumUrlParts() == $route->getNumUrlParts()) {
-            return 0;
+        //Number of URL parts fixed
+        if ($this->getNumUrlPartsFixed() > $route->getNumUrlPartsFixed()) {
+            return -1;
+        } elseif ($this->getNumUrlPartsFixed() < $route->getNumUrlPartsFixed()) {
+            return 1;
+        }
+            
+        //Number of URL parts
+        if ($this->getNumUrlParts() > $route->getNumUrlParts()) {
+            return -1;
+        } elseif ($this->getNumUrlParts() < $route->getNumUrlParts()) {
+            return 1;
         }
 
-        return ($this->getNumUrlParts() > $route->getNumUrlParts()) ? -1 : 1;
+        return 0;
     }
 
     /**
@@ -191,5 +211,15 @@ class Route
     public function getFirstUrlPartParameterPos()
     {
         return $this->first_url_part_parameter_pos;
-    }    
+    }
+
+    /**
+     * Object to string
+     *
+     * @return string (as "METHOD URL")
+     */
+    public function __toString()
+    {
+        return $this->request_method . " " . $this->url;
+    }
 }

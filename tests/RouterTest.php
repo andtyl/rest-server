@@ -5,7 +5,7 @@ use RestServer\Router;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
-    public function testRouter()
+    private function createRouter()
     {
         $senv = array(
             "REQUEST_URI" => "",
@@ -17,26 +17,65 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $request = new Request($senv, $params, $headers);
         $router = new Router($request);
-
-        /*
-        $router->get("hello", function() {
-            return 1;
-        });
-        $router->get("*", function() {
-            return 2;
-        });
-        $router->get("ḧello/to", function() {
-            return 3;
-        });
-        $router->get("ḧello/*", function() {
-            return 4;
-        });               
-        $callable = $router->matchRoute("GET", "/hello", $p);
-        $this->assertEquals(2, $callable());
-
-        $callable = $router->matchRoute("GET", "/hello/andy", $p);
-        $this->assertEquals(4, $callable());
-        */
+        return $router;       
     }
+
+    public function testRouterSort()
+    {
+        $router = $this->createRouter();
+
+        $router->get("/hello", function() {});
+        $router->get("/*", function() {});
+        $router->get("/hello/foo", function() {});
+        $router->get("/hello/*", function() {});        
+        $router->get("/hello/foo/bar", function() {});
+        $router->get("/hello/*/*", function() {});  
+        $router->get("/*/*/hello", function() {});  
+
+        $router->sortRoutes();
+
+        $correct_order_string = "GET /hello/foo/bar\nGET /hello/foo\nGET /hello\nGET /hello/*/*\nGET /hello/*\nGET /*/*/hello\nGET /*\n";
+
+        $order_string = "";
+        foreach ($router->getRoutes() as $route) {
+            $order_string .= $route . "\n";
+        }
+
+        $this->assertEquals($correct_order_string, $order_string);
+    }
+
+    public function testRouterMatch()
+    {
+        $router = $this->createRouter();
+        $router->get("/hello", function() { return 1; });
+        $router->get("/*", function() { return 2; });
+        $router->get("/hello/foo", function() { return 3; }); 
+        $router->get("/*/*/hello", function() { return 4; });
+
+        $c = $router->matchRoute("GET", "/hello", $params);
+        $this->assertEquals(1, $c());
+
+        $c = $router->matchRoute("GET", "/hello/", $params);
+        $this->assertEquals(1, $c());
+
+        $c = $router->matchRoute("GET", "/foo", $params);
+        $this->assertEquals(2, $c());
+
+        $c = $router->matchRoute("GET", "/hello/foo", $params);
+        $this->assertEquals(3, $c());
+
+        $c = $router->matchRoute("GET", "/foo/bar/hello", $params);
+        $this->assertEquals(4, $c());                
+
+        $c = $router->matchRoute("GET", "/hello/foo/hello", $params);
+        $this->assertEquals(4, $c());
+
+        $c = $router->matchRoute("GET", "/hello/foo/hello/", $params);
+        $this->assertEquals(4, $c());
+
+        $this->setExpectedException('RestServer\Exception\RestServerException');
+        $c = $router->matchRoute("GET", "/hello/foo/hello/foo", $params);
+    }
+
 
 }
