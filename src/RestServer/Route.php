@@ -131,14 +131,15 @@ class Route
     public function compareTo(Route $route)
     {
         if ($this->getFirstUrlPartParameterPos() > $route->getFirstUrlPartParameterPos()) {
-            return -1;
-        } elseif ($this->getFirstUrlPartParameterPos() < $route->getFirstUrlPartParameterPos()) {
             return 1;
+        } elseif ($this->getFirstUrlPartParameterPos() < $route->getFirstUrlPartParameterPos()) {
+            return -1;
         }
 
         if ($this->getNumUrlParts() == $route->getNumUrlParts()) {
             return 0;
         }
+
         return ($this->getNumUrlParts() > $route->getNumUrlParts()) ? -1 : 1;
     }
 

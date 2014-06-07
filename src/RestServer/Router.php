@@ -35,8 +35,6 @@ class Router
      */
     public function run()
     {
-        $this->sortRoutes();
-
         try {
             $params = array();
             $callable = $this->matchRoute($this->request->getRequestMethod(), $this->request->getUrl(), $params);
@@ -60,8 +58,10 @@ class Router
      * @return Route Instance of a Route
      * @throws RestServerException If no Route is matched
      */
-    protected function matchRoute($method, $url, &$params)
+    public function matchRoute($method, $url, &$params)
     {
+        $this->sortRoutes();
+
         foreach ($this->routes as $route) {
             if ($route->match($method, $url, $params)) {
                 return $route->getCallable();

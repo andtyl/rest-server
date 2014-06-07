@@ -20,14 +20,14 @@ class RequestTest extends PHPUnit_Framework_TestCase
         //Mock Request
         $request = new Request($senv, $params, $headers);
 
-        $this->assertEquals($request->getRequestMethod(), "GET");
-        $this->assertEquals($request->getUrl(), "/hello");
-        $this->assertEquals($request->getParam("foo"), "bar");
-        $this->assertEquals($request->getParam(), array("foo" => "bar"));
-        $this->assertEquals($request->getHeader("X-FOO"), "BAR");
-        $this->assertEquals($request->getUserAgent(), "IE");
-        $this->assertEquals($request->isSecure(), true);
-        $this->assertEquals($request->getIp(), "8.8.8.8");
+        $this->assertEquals("GET", $request->getRequestMethod());
+        $this->assertEquals("/hello", $request->getUrl());
+        $this->assertEquals("bar", $request->getParam("foo"));
+        $this->assertEquals(array("foo" => "bar"), $request->getParam());
+        $this->assertEquals("BAR", $request->getHeader("X-FOO"));
+        $this->assertEquals("IE", $request->getUserAgent());
+        $this->assertEquals(true, $request->isSecure());
+        $this->assertEquals("8.8.8.8", $request->getIp());
     }
 
 }

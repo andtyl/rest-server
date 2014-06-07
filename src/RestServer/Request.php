@@ -48,7 +48,7 @@ class Request
     protected function parseUrl()
     {
         $url_path = "";
-        if ($this->senv['REQUEST_URI']) {
+        if (isset($this->senv['REQUEST_URI']) && $this->senv['REQUEST_URI']) {
             $url_path = $this->senv['REQUEST_URI'];
             $str_pos = strpos($url_path, "?");
             if ($str_pos !== false) {
@@ -57,7 +57,7 @@ class Request
         }
 
         //Remove sub dir path from url path
-        if ($this->senv['SCRIPT_NAME']) {
+        if (isset($this->senv['SCRIPT_NAME']) && $this->senv['SCRIPT_NAME']) {
             $sub_dir_path = dirname($this->senv['SCRIPT_NAME']);
             //$sub_dir_path = $this->senv['SCRIPT_NAME'];
             $url_path = substr($url_path, strlen($sub_dir_path)); 
@@ -93,7 +93,7 @@ class Request
                 $this->params = array();
                 break;
             default:
-                throw new RestServerException(RestServerException::METHOD_NOT_ALLOWED, "", "", "");
+                throw new RestServerException(RestServerException::METHOD_NOT_ALLOWED, 0, "", "");
         }       
     }
     
@@ -104,7 +104,9 @@ class Request
      */
     protected function parseHeaders()
     {
-        $this->headers = apache_request_headers();
+        if (function_exists("apache_request_headers")) {
+            $this->headers = apache_request_headers(); 
+        }
     }
 
     /**
@@ -114,7 +116,7 @@ class Request
      */
     public function getRequestMethod()
     {
-        return $this->senv['REQUEST_METHOD'];
+        return isset($this->senv['REQUEST_METHOD']) ? $this->senv['REQUEST_METHOD'] : "";
     }
 
     /**
@@ -124,7 +126,7 @@ class Request
      */
     public function getUserAgent()
     {
-        return $this->senv['HTTP_USER_AGENT']; 
+        return isset($this->senv['HTTP_USER_AGENT']) ? $this->senv['HTTP_USER_AGENT'] : ""; 
     }
     
     /**
@@ -134,7 +136,7 @@ class Request
      */
     public function isSecure()
     {
-        return $this->senv['HTTPS'] ? true : false;
+        return isset($this->senv['HTTPS']) && $this->senv['HTTPS'] ? true : false;
     }
 
     /**
@@ -144,7 +146,7 @@ class Request
      */
     public function getIp()
     {
-        return $this->senv['REMOTE_ADDR'];
+        return isset($this->senv['REMOTE_ADDR']) ? $this->senv['REMOTE_ADDR'] : "";
     }
 
     /**
