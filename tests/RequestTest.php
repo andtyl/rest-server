@@ -29,5 +29,4 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, $request->isSecure());
         $this->assertEquals("8.8.8.8", $request->getIp());
     }
-
 }

@@ -49,7 +49,7 @@ class Token
      * @param string $url URL
      * @return bool
      */
-    protected function isValidUrl($url)
+    public function isValidUrl($url)
     {
         $url = trim($url, "/") . "/";
         foreach ($this->valid_url_regexs as $re) {

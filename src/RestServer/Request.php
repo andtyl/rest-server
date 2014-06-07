@@ -63,7 +63,7 @@ class Request
         }
 
         $url_path = rtrim($url_path, "/");
-    
+
         if (empty($url_path)) {
             $url_path = "/";
         }

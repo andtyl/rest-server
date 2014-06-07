@@ -60,7 +60,7 @@ class Route
      */
     protected function parseUrl()
     {
-        $this->url_regex = "~^" . preg_replace("~(/\*)~", "/[^\/]+", $this->url, -1, $this->num_url_parts_parameter) . "$~";
+        $this->url_regex = "~^" . preg_replace("~(/\*)~", "/([^\/]+)", $this->url, -1, $this->num_url_parts_parameter) . "$~";
         $this->num_url_parts = substr_count($this->url, "/");
         $this->num_url_parts_fixed = $this->num_url_parts - $this->num_url_parts_parameter;
     }
@@ -89,7 +89,7 @@ class Route
      * @param array $params Parameters passed by reference (to be accessible from the calling Router)
      * @return bool Do match
      */
-    public function match($request_method, $url, &$params = array())
+    public function match($request_method, $url, &$params)
     {
         return $this->matchRequestMethod($request_method) && $this->matchUrl($url, $params);
     }
@@ -117,7 +117,7 @@ class Route
         //Ensure path is absolute and no trailing slash
         $url = "/" . trim($url, "/");
 
-        if (preg_match($this->url_regex, $url, $params)) {
+        if (preg_match($this->url_regex, $url, $params)) {           
            array_shift($params); //First match is the whole regex, remove!
            return true; 
         }
