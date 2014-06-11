@@ -12,7 +12,10 @@ class Router
     /** @var array Array of Routes */
     protected $routes = array();
 
-    /** @var array Array of Tokens */
+    /** @var boolean Should every request be authenticated */
+    protected $authenticate = false;
+
+    /** @var array Array of Tokens for authentication */
     protected $tokens = array();
 
     /**
@@ -148,6 +151,10 @@ class Router
      */
     protected function authenticate()
     {
+        if (!$this->authenticate) {
+            return;
+        }
+
         $auth_key = $this->request->getParam("auth_key", null);
 
         if ($auth_key === null) {
@@ -212,6 +219,16 @@ class Router
     }
 
     /**
+     * Set authentication, if so, every request need authentication
+     *
+     * @param [type] $authenticate
+     */
+    public function setAuthentication($authenticate)
+    {
+        $this->authenticate = (boolean)$authenticate;
+    }
+
+    /**
      * Create a authentication token
      *
      * @param string $key API Key
@@ -220,6 +237,7 @@ class Router
      */
     public function auth($key, $secret)
     {
+        $this->setAuthentication(true);
         return $this->tokens[$key] = new Token($key, $secret);
     }
 }
